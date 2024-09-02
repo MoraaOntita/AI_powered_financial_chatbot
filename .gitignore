@@ -1,0 +1,70 @@
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+
+# Java
+*.class
+
+# Environment files
+.env
+*.env
+
+# Log files
+*.log
+
+# Build output
+dist/
+build/
+
+# IDE files
+.vscode/
+.idea/
+
+# Miscellaneous
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Docker
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# IntelliJ
+*.iml
+
+# Package distribution
+*.egg
+*.egg-info
+dist/
+build/
+
+# Coverage reports
+.coverage
+*.cover
+*.py,cover
+nosetests.xml
+coverage.xml
+*.log
+*.sqlite
+
+# PyCharm
+.idea/
+
+# Virtual environment
+venv/
+env/
+ENV/
