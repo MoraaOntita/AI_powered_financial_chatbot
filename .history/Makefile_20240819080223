@@ -3,7 +3,6 @@ PYTHON = python3
 PIP = pip
 FLASK = flask
 VENV = venv
-DATA_FILE = /path/to/your/data.csv  # Path to the data file
 
 # Paths to the scripts
 FINANCIAL_SCRIPT = src/inserting_data/insert_financial_data.py
@@ -28,9 +27,9 @@ venv:
 install: venv
 	$(VENV)/bin/$(PIP) install -r requirements.txt
 
-# Run the insert_financial_data.py script with the data file argument
+# Run the insert_financial_data.py script
 run-financial:
-	$(VENV)/bin/$(PYTHON) $(FINANCIAL_SCRIPT) --data-file $(DATA_FILE)
+	$(VENV)/bin/$(PYTHON) $(FINANCIAL_SCRIPT)
 
 # Run the insert_qa_pairs.py script
 run-qa-pairs:
