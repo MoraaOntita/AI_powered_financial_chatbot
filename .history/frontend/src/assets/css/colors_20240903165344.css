@@ -1,0 +1,10 @@
+/* colors.css */
+:root {
+    --bcg-bg-color: #f7f7f7;
+    --bcg-text-color: #333;
+    --bcg-primary-color: #005f83;
+    --bcg-secondary-bg-color: #ffffff;
+    --bcg-border-color: #e0e0e0;
+    --bcg-button-color: #005f83;
+    --bcg-button-hover-color: #004666;
+}
