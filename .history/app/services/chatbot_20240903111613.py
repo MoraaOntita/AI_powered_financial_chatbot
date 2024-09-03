@@ -1,12 +1,8 @@
 from typing import Optional
 import logging
-from flask import Blueprint, request, jsonify
 import psycopg2
 from psycopg2.extras import DictCursor
 from config import DB_CONFIG
-
-# Define the chatbot blueprint
-chatbot_bp = Blueprint('chatbot', __name__)
 
 class ChatbotError(Exception):
     """Custom exception for Chatbot-related errors."""
@@ -69,10 +65,3 @@ def process_question(question: str) -> Optional[str]:
     except Exception as e:
         logging.error(f"An error occurred while processing the question: {e}")
         return None
-
-# Define a route for asking questions
-@chatbot_bp.route('/ask', methods=['POST'])
-def ask_question():
-    question = request.json.get('question')
-    answer = process_question(question)
-    return jsonify({'answer': answer})

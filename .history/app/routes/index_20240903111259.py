@@ -3,9 +3,9 @@ from typing import Any, Dict
 import logging
 
 # Define the Blueprint for the main routes
-index_bp = Blueprint('index_bp', __name__)
+main = Blueprint('main', __name__)
 
-@index_bp.route('/')
+@main.route('/')
 def index() -> str:
     """
     The main route that serves the homepage.
@@ -19,7 +19,7 @@ def index() -> str:
         current_app.logger.error(f"Error rendering index.html: {e}")
         return "An error occurred while loading the page.", 500
 
-@index_bp.route('/api/ask', methods=['POST'])
+@main.route('/api/ask', methods=['POST'])
 def ask_question() -> Any:
     """
     Route to handle questions sent to the chatbot.

@@ -22,7 +22,7 @@ def create_app() -> Flask:
     app = Flask(__name__)
 
     try:
-        app.config['SECRET_KEY'] = 'your_secret_key'  # Replace with your actual secret key
+        app.config['SECRET_KEY'] = 'your_secret_key'
         app.config['SQLALCHEMY_DATABASE_URI'] = (
             f"postgresql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@"
             f"{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['dbname']}"
@@ -37,15 +37,11 @@ def create_app() -> Flask:
         from app.routes.index import index_bp
         app.register_blueprint(index_bp)
 
-        # Ensure chatbot_bp is imported from the correct module
         from app.services.chatbot import chatbot_bp
-        app.register_blueprint(chatbot_bp, url_prefix='/chatbot')
+        app.register_blueprint(chatbot_bp)
 
         return app
 
-    except ImportError as e:
-        logging.error(f"Import error: {e}")
-        raise AppInitializationError(f"Failed to initialize the app due to import error: {e}")
     except Exception as e:
-        logging.error(f"Initialization error: {e}")
+        logging.error(f"Failed to initialize the app: {e}")
         raise AppInitializationError(f"Failed to initialize the app: {e}")
