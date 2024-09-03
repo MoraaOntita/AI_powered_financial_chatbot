@@ -21,14 +21,24 @@ class FinancialDataInserter:
             ('Apple', 2021, 365817, 94680, 351002, 287912, 104038)
         ]
 
-
     def _connect(self):
         try:
             return psycopg2.connect(**self.db_config)
         except Exception as e:
             raise DatabaseError(f"Failed to connect to the database: {e}")
 
+    def _preprocess_data(self):
+        """Replace None values with zero in financial data."""
+        self.financial_data = [
+            (
+                company_name, year, total_revenue or 0, net_income or 0,
+                total_assets or 0, total_liabilities or 0, cash_flow_from_operating_activities or 0
+            )
+            for company_name, year, total_revenue, net_income, total_assets, total_liabilities, cash_flow_from_operating_activities in self.financial_data
+        ]
+
     def insert_financial_data(self):
+        self._preprocess_data()  # Preprocess data before inserting
         try:
             with self._connect() as conn:
                 with conn.cursor() as cur:

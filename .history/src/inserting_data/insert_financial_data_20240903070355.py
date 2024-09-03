@@ -21,7 +21,6 @@ class FinancialDataInserter:
             ('Apple', 2021, 365817, 94680, 351002, 287912, 104038)
         ]
 
-
     def _connect(self):
         try:
             return psycopg2.connect(**self.db_config)

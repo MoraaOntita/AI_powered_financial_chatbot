@@ -9,6 +9,7 @@ class DatabaseError(Exception):
 class FinancialDataInserter:
     def __init__(self, db_config: dict):
         self.db_config = db_config
+        # Updated data with possible NULL values replaced by 0
         self.financial_data: List[Tuple] = [
             ('Microsoft', 2023, 211915, 72361, 411976, 205753, 34704),
             ('Microsoft', 2022, 198270, 72738, 364840, 198298, 13931),
@@ -20,7 +21,6 @@ class FinancialDataInserter:
             ('Apple', 2022, 394328, 99803, 352755, 302038, 122151),
             ('Apple', 2021, 365817, 94680, 351002, 287912, 104038)
         ]
-
 
     def _connect(self):
         try:
@@ -43,13 +43,20 @@ class FinancialDataInserter:
                         total_liabilities = EXCLUDED.total_liabilities,
                         cash_flow_from_operating_activities = EXCLUDED.cash_flow_from_operating_activities;
                     """
-                    cur.executemany(insert_query, self.financial_data)
+                    cur.executemany(insert_query, self._replace_null_values(self.financial_data))
                     conn.commit()
                     print("Financial data inserted/updated successfully!")
         except Exception as e:
             print(f"An error occurred: {e}")
             if conn is not None:
                 conn.rollback()
+
+    def _replace_null_values(self, data: List[Tuple]) -> List[Tuple]:
+        """Replace None values with 0 in financial data."""
+        return [
+            tuple(0 if val is None else val for val in row)
+            for row in data
+        ]
 
 # Instantiate with dependency injection
 financial_data_inserter = FinancialDataInserter(DB_CONFIG)

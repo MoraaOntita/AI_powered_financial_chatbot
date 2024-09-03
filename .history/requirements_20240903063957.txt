@@ -5,4 +5,3 @@ seaborn
 psycopg2
 python-dotenv
 flask
-
