@@ -3,7 +3,7 @@ PYTHON = python3
 PIP = pip
 FLASK = flask
 VENV = venv
-DATA_FILE = /home/moraa/Documents/BCG-Chatbot/data/BCG-X - Sheet1.csv
+DATA_FILE = /path/to/your/data.csv  # Path to the data file
 
 # Paths to the scripts
 FINANCIAL_SCRIPT = src/inserting_data/insert_financial_data.py
