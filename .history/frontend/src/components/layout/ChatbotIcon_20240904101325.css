@@ -1,0 +1,15 @@
+.chatbot-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--bcg-primary-color);
+    border-radius: 50%;
+    padding: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
+}
+
+.chatbot-icon:hover {
+    background-color: var(--bcg-button-hover-color);
+}
