@@ -1,17 +1,5 @@
-/* MainLayout.css */
+/* ChatbotIcon.css */
 
-.main-layout {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-.content {
-    flex: 1;
-    padding: 20px;
-}
-
-/* Positioning for Chatbot Icon */
 .chatbot-icon {
     position: fixed;
     bottom: 20px;
