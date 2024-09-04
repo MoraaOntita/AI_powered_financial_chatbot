@@ -1,0 +1,19 @@
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: #fff; /* Ensure the header has a professional clean background */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.header-logo {
+    height: 50px; /* Size the logo appropriately */
+    margin-right: 20px;
+}
+
+.header-title {
+    font-size: 2rem;
+    color: #0046ad; /* BCG-themed color */
+    margin: 0;
+}
