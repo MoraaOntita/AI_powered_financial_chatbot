@@ -1,0 +1,21 @@
+.footer {
+    background-color: var(--bcg-footer-bg-color);
+    padding: 20px;
+    text-align: center;
+    color: var(--bcg-text-color);
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.footer-links a {
+    color: var(--bcg-text-color);
+    text-decoration: none;
+}
