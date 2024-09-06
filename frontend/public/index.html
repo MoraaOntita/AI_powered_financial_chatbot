@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#006341"> <!-- BCG Green -->
+    <meta name="description" content="BCG Chatbot - Your assistant for financial queries.">
+    
+    <!-- Social Media Preview Images -->
+    <meta property="og:image" content="/images/og-image.jpg">
+    <meta property="og:image:alt" content="BCG Chatbot Preview">
+    <meta name="twitter:image" content="/images/og-image.jpg">
+    
+    <!-- Title and Favicon -->
+    <title>BCG Chatbot</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/reset.css">
+    <link rel="stylesheet" href="/css/fonts.css">
+    <link rel="stylesheet" href="/css/colors.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/main.css">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Loading Spinner -->
+    <img src="/images/loading-spinner.gif" alt="Loading..." style="display: none;" id="loading-spinner">
+
+    <!-- Scripts -->
+    <script src="/js/main.js" defer></script>
+
+    <!-- Service Worker (for PWA) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service worker registered:', reg))
+                    .catch(err => console.log('Service worker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
