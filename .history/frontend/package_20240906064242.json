@@ -1,0 +1,25 @@
+{
+  "name": "BCG-chatbot-front",
+  "version": "1",
+  "main": "index.js",
+  "author": "Moraa",
+  "license": "MIT",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "@testing-library/react": "^16.0.1",
+    "axios": "^1.7.7",
+    "eslint": "^9.9.1",
+    "lodash": "^4.17.21",
+    "prettier": "^3.3.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.3.0",
+    "sass": "^1.78.0",
+    "styled-components": "^6.1.13"
+  }
+}
