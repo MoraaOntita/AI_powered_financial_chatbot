@@ -68,3 +68,5 @@ coverage.xml
 venv/
 env/
 ENV/
+
+.history/
