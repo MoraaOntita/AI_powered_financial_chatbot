@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
+import os
 import logging
 from config import DB_CONFIG
 
@@ -22,7 +23,10 @@ def create_app() -> Flask:
     app = Flask(__name__)
 
     try:
-        app.config['SECRET_KEY'] = 'your_secret_key'  # Replace with your actual secret key
+        # Load secret key from environment variable or default value
+        app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret_key')
+
+        # Load database configuration from environment variables
         app.config['SQLALCHEMY_DATABASE_URI'] = (
             f"postgresql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@"
             f"{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['dbname']}"
