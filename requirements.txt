@@ -2,7 +2,7 @@ pandas
 matplotlib
 seaborn
 
-psycopg2
+psycopg2-binary
 python-dotenv
 flask
 flask_cors
