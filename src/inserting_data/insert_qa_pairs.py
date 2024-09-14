@@ -28,8 +28,25 @@ class QADataInserter:
         except Exception as e:
             raise DatabaseError(f"Failed to connect to the database: {e}")
 
+    def _create_table(self):
+        create_table_query = """
+        CREATE TABLE IF NOT EXISTS qa_pairs (
+            id SERIAL PRIMARY KEY,
+            question TEXT,
+            answer TEXT,
+            company_name VARCHAR(255),
+            year INT,
+            UNIQUE (question, company_name, year)
+        );
+        """
+        with self._connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(create_table_query)
+                conn.commit()
+
     def insert_qa_pairs(self):
         try:
+            self._create_table()
             with self._connect() as conn:
                 with conn.cursor() as cur:
                     insert_query = """

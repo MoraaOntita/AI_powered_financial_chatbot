@@ -21,15 +21,34 @@ class FinancialDataInserter:
             ('Apple', 2021, 365817, 94680, 351002, 287912, 104038)
         ]
 
-
     def _connect(self):
         try:
             return psycopg2.connect(**self.db_config)
         except Exception as e:
             raise DatabaseError(f"Failed to connect to the database: {e}")
 
+    def _create_table(self):
+        create_table_query = """
+        CREATE TABLE IF NOT EXISTS financial_data (
+            id SERIAL PRIMARY KEY,
+            company_name VARCHAR(255),
+            year INT,
+            total_revenue NUMERIC,
+            net_income NUMERIC,
+            total_assets NUMERIC,
+            total_liabilities NUMERIC,
+            cash_flow_from_operating_activities NUMERIC,
+            UNIQUE (company_name, year)
+        );
+        """
+        with self._connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(create_table_query)
+                conn.commit()
+
     def insert_financial_data(self):
         try:
+            self._create_table()
             with self._connect() as conn:
                 with conn.cursor() as cur:
                     insert_query = """
