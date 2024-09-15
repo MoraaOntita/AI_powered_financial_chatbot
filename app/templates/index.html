@@ -39,7 +39,7 @@
     <script>
         function askQuestion() {
             const question = document.getElementById('question').value;
-            fetch('/api/ask', {
+            fetch('/chatbot/ask', {  <!-- Updated URL -->
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
