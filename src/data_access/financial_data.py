@@ -1,6 +1,6 @@
 import psycopg2
 from config import DB_CONFIG
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Dict
 
 class DatabaseError(Exception):
     """Custom exception for database errors."""
@@ -11,24 +11,36 @@ class FinancialDataAccess:
         self.db_config = db_config
 
     def _connect(self):
+        """Establishes a connection to the database."""
         try:
             return psycopg2.connect(**self.db_config)
         except Exception as e:
             raise DatabaseError(f"Failed to connect to the database: {e}")
 
-    def _fetchone(self, query: str, params: Tuple) -> Optional[Tuple]:
-        with self._connect() as conn:
-            with conn.cursor() as cur:
-                cur.execute(query, params)
-                return cur.fetchone()
+    def _fetchone(self, query: str, params: Tuple) -> Optional[Dict]:
+        """Executes a query and fetches one result."""
+        try:
+            with self._connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, params)
+                    result = cur.fetchone()
+                    return dict(result) if result else None
+        except Exception as e:
+            raise DatabaseError(f"Failed to fetch data: {e}")
 
-    def _fetchall(self, query: str, params: Tuple) -> List[Tuple]:
-        with self._connect() as conn:
-            with conn.cursor() as cur:
-                cur.execute(query, params)
-                return cur.fetchall()
+    def _fetchall(self, query: str, params: Tuple) -> List[Dict]:
+        """Executes a query and fetches all results."""
+        try:
+            with self._connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, params)
+                    results = cur.fetchall()
+                    return [dict(result) for result in results]
+        except Exception as e:
+            raise DatabaseError(f"Failed to fetch data: {e}")
 
-    def get_financial_data(self, company_name: str, year: int) -> Optional[Tuple]:
+    def get_financial_data(self, company_name: str, year: int) -> Optional[Dict]:
+        """Fetches financial data for a specific company and year."""
         query = """
         SELECT total_revenue, net_income, total_assets, total_liabilities, cash_flow_from_operating_activities
         FROM financial_data
@@ -36,7 +48,8 @@ class FinancialDataAccess:
         """
         return self._fetchone(query, (company_name, year))
 
-    def get_qa_pairs(self, company_name: str, year: int) -> List[Tuple]:
+    def get_qa_pairs(self, company_name: str, year: int) -> List[Dict]:
+        """Fetches QA pairs for a specific company and year."""
         query = """
         SELECT question, answer
         FROM qa_pairs

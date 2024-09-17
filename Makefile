@@ -1,82 +1,64 @@
 # Variables
-PYTHON = python3
-PIP = pip
-FLASK = flask
-VENV = venv
-DATA_FILE = /home/moraa/Documents/BCG-Chatbot/data/BCG-X - Sheet1.csv
-
-# Paths to the scripts
-FINANCIAL_SCRIPT = src/inserting_data/insert_financial_data.py
-QA_PAIRS_SCRIPT = src/inserting_data/insert_qa_pairs.py
-MAIN_SCRIPT = src/main.py
-RULES_DIR = src/rules/
-RULES_SCRIPT = src/rules.py
-
-# Export PYTHONPATH to include the root directory of the project
-export PYTHONPATH := $(shell pwd)
-
-# Targets
+DOCKER = docker
+DOCKER_COMPOSE = docker-compose
 
 # Default target
-all: install run-financial run-qa-pairs run-flask
+all: build up test
 
-# Create a virtual environment
-venv:
-	$(PYTHON) -m venv $(VENV)
+# Build the Docker images
+build:
+	$(DOCKER_COMPOSE) build
 
-# Install dependencies
-install: venv
-	$(VENV)/bin/$(PIP) install -r requirements.txt
+# Start the services defined in docker-compose.yml
+up:
+	$(DOCKER_COMPOSE) up -d
 
-# Run the insert_financial_data.py script with the data file argument
-run-financial:
-	$(VENV)/bin/$(PYTHON) $(FINANCIAL_SCRIPT) --data-file $(DATA_FILE)
+# Stop and remove containers, networks, and volumes
+down:
+	$(DOCKER_COMPOSE) down
 
-# Run the insert_qa_pairs.py script
-run-qa-pairs:
-	$(VENV)/bin/$(PYTHON) $(QA_PAIRS_SCRIPT)
+# Run the insert data scripts
+insert-data:
+	$(DOCKER_COMPOSE) exec backend python src/inserting_data/insert_financial_data.py --data-file /app/data/BCG_X_Sheet1.csv
+	$(DOCKER_COMPOSE) exec backend python src/inserting_data/insert_qa_pairs.py
 
-# Run the Flask application
-run-flask:
-	FLASK_APP=app:create_app $(VENV)/bin/$(FLASK) run
-
-# Run both data insertion scripts and Flask app
-run: run-financial run-qa-pairs run-flask
-
-# Run tests (if any)
+# Run tests inside the backend container
 test:
-	$(VENV)/bin/$(PYTHON) -m unittest discover -s tests
+	$(DOCKER_COMPOSE) exec backend pytest
 
-# Clean up temporary files
-clean:
-	rm -rf $(VENV)
-	rm -f *.log
-
-# Lint code with pylint (including rules and main script)
+# Lint code inside the backend container
 lint:
-	$(VENV)/bin/$(PYTHON) -m pylint $(FINANCIAL_SCRIPT) $(QA_PAIRS_SCRIPT) $(MAIN_SCRIPT) $(RULES_SCRIPT) $(RULES_DIR)*.py
+	$(DOCKER_COMPOSE) exec backend pylint src
 
-# Format code with black (including rules and main script)
+# Format code inside the backend container
 format:
-	$(VENV)/bin/$(PYTHON) -m black $(FINANCIAL_SCRIPT) $(QA_PAIRS_SCRIPT) $(MAIN_SCRIPT) $(RULES_SCRIPT) $(RULES_DIR)*.py
+	$(DOCKER_COMPOSE) exec backend black src
+
+# Check if the application is running correctly
+check:
+	$(DOCKER_COMPOSE) exec backend curl -X POST -H "Content-Type: application/json" -d '{"question": "What is Microsoft's revenue for 2023?"}' http://localhost:5000/ask
+
+# Clean up temporary files and volumes
+clean:
+	$(DOCKER_COMPOSE) down -v
+	rm -rf .tox .nox .coverage coverage.xml
 
 # Help command to display available commands
 help:
 	@echo "Usage: make [target]"
 	@echo
 	@echo "Targets:"
-	@echo "  all           - Set up environment and run both data insertion scripts and the Flask app"
-	@echo "  venv          - Create a virtual environment"
-	@echo "  install       - Install Python dependencies"
-	@echo "  run-financial - Run the insert_financial_data.py script"
-	@echo "  run-qa-pairs  - Run the insert_qa_pairs.py script"
-	@echo "  run-flask     - Run the Flask app"
-	@echo "  run           - Run both data insertion scripts and Flask app"
-	@echo "  test          - Run unit tests"
-	@echo "  clean         - Clean up temporary files"
-	@echo "  lint          - Lint code with pylint"
-	@echo "  format        - Format code with black"
+	@echo "  all           - Build, start containers, and run tests"
+	@echo "  build         - Build the Docker images"
+	@echo "  up            - Start the services"
+	@echo "  down          - Stop and remove containers, networks, and volumes"
+	@echo "  insert-data   - Run data insertion scripts"
+	@echo "  test          - Run tests inside the backend container"
+	@echo "  lint          - Lint code inside the backend container"
+	@echo "  format        - Format code inside the backend container"
+	@echo "  check         - Check if the application responds correctly"
+	@echo "  clean         - Clean up temporary files and volumes"
 	@echo "  help          - Display this help message"
 
 # Phony targets
-.PHONY: all venv install run-financial run-qa-pairs run-flask run test clean lint format help
+.PHONY: all build up down insert-data test lint format check clean help
