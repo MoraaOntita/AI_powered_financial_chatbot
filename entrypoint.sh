@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Wait for PostgreSQL to be ready
-./wait-for-postgres.sh postgres
+/app/wait-for-postgres.sh postgres
 
 # Check if the wait was successful
 if [ $? -ne 0 ]; then
