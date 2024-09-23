@@ -37,11 +37,10 @@ def create_app() -> Flask:
         migrate.init_app(app, db)
         CORS(app)
 
-        # Register your blueprints here
+        # Register blueprints
         from app.routes.index import index_bp
         app.register_blueprint(index_bp)
 
-        # Ensure chatbot_bp is imported from the correct module
         from app.services.chatbot import chatbot_bp
         app.register_blueprint(chatbot_bp, url_prefix='/chatbot')
 

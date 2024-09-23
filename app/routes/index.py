@@ -31,8 +31,18 @@ def ask_question() -> Any:
         Any: JSON response containing the chatbot's answer or an error message.
     """
     try:
-        data: Dict[str, Any] = request.get_json()
-        question: str = data.get('question', '')
+        # Get the incoming JSON data
+        data = request.get_json()
+
+        # Log the received data to help with debugging
+        current_app.logger.info(f"Received data: {data}")
+
+        # Check if data is a dictionary, otherwise raise an error
+        if not isinstance(data, dict):
+            raise ValueError(f"Expected data to be a dictionary, but got {type(data)} instead.")
+
+        # Get the 'question' key from the data
+        question = data.get('question', '')
 
         if not question:
             return jsonify({'error': 'Question is required'}), 400
@@ -41,10 +51,20 @@ def ask_question() -> Any:
         from app.services.chatbot import process_question
         answer = process_question(question)
 
+        # Log the answer to help with debugging
+        current_app.logger.info(f"Processed answer: {answer}")
+
         return jsonify({'question': question, 'answer': answer})
+
     except KeyError as e:
         current_app.logger.error(f"Missing key in request data: {e}")
         return jsonify({'error': f"Missing key: {str(e)}"}), 400
+
+    except ValueError as e:
+        # Handle cases where data isn't the expected type
+        current_app.logger.error(f"ValueError: {e}")
+        return jsonify({'error': str(e)}), 400
+
     except Exception as e:
         current_app.logger.error(f"An error occurred while processing the question: {e}")
         return jsonify({'error': 'An error occurred while processing your request.'}), 500

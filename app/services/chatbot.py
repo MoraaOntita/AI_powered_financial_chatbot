@@ -3,7 +3,7 @@ import logging
 from typing import Optional
 from flask import Blueprint, request, jsonify
 from config import DB_CONFIG
-from src.data_access.financial_data import financial_data_access
+from app.models.financial_data import FinancialDataAccess
 
 # Define the chatbot blueprint
 chatbot_bp = Blueprint('chatbot', __name__)
@@ -11,6 +11,9 @@ chatbot_bp = Blueprint('chatbot', __name__)
 class ChatbotError(Exception):
     """Custom exception for Chatbot-related errors."""
     pass
+
+# Initialize FinancialDataAccess
+financial_data_access = FinancialDataAccess(DB_CONFIG)
 
 def fetch_financial_data(company_name: str, year: Optional[int] = None) -> Optional[dict]:
     """
@@ -43,18 +46,22 @@ def calculate_percentage_change(company: str, metric: str, start_year: int, end_
     Returns:
         Optional[float]: The percentage change in the financial metric, or None if data is not available.
     """
-    data_start = fetch_financial_data(company, start_year)
-    data_end = fetch_financial_data(company, end_year)
-    
-    if data_start and data_end:
-        start_value = data_start.get(metric)
-        end_value = data_end.get(metric)
-        if start_value is not None and end_value is not None:
-            try:
-                change = ((end_value - start_value) / start_value) * 100
-                return change
-            except ZeroDivisionError:
-                return None
+    try:
+        data_start = fetch_financial_data(company, start_year)
+        data_end = fetch_financial_data(company, end_year)
+        
+        if data_start and data_end:
+            start_value = data_start.get(metric)
+            end_value = data_end.get(metric)
+            if start_value is not None and end_value is not None:
+                try:
+                    change = ((end_value - start_value) / start_value) * 100
+                    return change
+                except ZeroDivisionError:
+                    logging.warning(f"ZeroDivisionError for {metric} of {company} from {start_year} to {end_year}")
+                    return None
+    except Exception as e:
+        logging.error(f"An error occurred while calculating percentage change: {e}")
     return None
 
 def extract_year_from_question(question: str) -> Optional[int]:
@@ -132,6 +139,13 @@ def process_question(question: str) -> Optional[str]:
 # Define a route for asking questions
 @chatbot_bp.route('/ask', methods=['POST'])
 def ask_question():
-    question = request.json.get('question')
-    answer = process_question(question)
-    return jsonify({'answer': answer})
+    try:
+        question = request.json.get('question')
+        if not question:
+            return jsonify({'error': 'Question is required'}), 400
+        
+        answer = process_question(question)
+        return jsonify({'answer': answer})
+    except Exception as e:
+        logging.error(f"An error occurred while handling the question: {e}")
+        return jsonify({'error': 'An error occurred while processing your request.'}), 500

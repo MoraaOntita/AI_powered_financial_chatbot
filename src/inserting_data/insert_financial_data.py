@@ -41,30 +41,34 @@ class FinancialDataInserter:
             UNIQUE (company_name, year)
         );
         """
-        with self._connect() as conn:
-            with conn.cursor() as cur:
-                cur.execute(create_table_query)
-                conn.commit()
-
-    def insert_financial_data(self):
         try:
-            self._create_table()
             with self._connect() as conn:
                 with conn.cursor() as cur:
-                    insert_query = """
-                    INSERT INTO financial_data (company_name, year, total_revenue, net_income, total_assets, total_liabilities, cash_flow_from_operating_activities)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (company_name, year) 
-                    DO UPDATE SET 
-                        total_revenue = EXCLUDED.total_revenue,
-                        net_income = EXCLUDED.net_income,
-                        total_assets = EXCLUDED.total_assets,
-                        total_liabilities = EXCLUDED.total_liabilities,
-                        cash_flow_from_operating_activities = EXCLUDED.cash_flow_from_operating_activities;
-                    """
-                    cur.executemany(insert_query, self.financial_data)
+                    cur.execute(create_table_query)
                     conn.commit()
-                    print("Financial data inserted/updated successfully!")
+        except Exception as e:
+            raise DatabaseError(f"Failed to create table: {e}")
+
+    def insert_financial_data(self):
+        conn = None
+        try:
+            self._create_table()
+            conn = self._connect()
+            with conn.cursor() as cur:
+                insert_query = """
+                INSERT INTO financial_data (company_name, year, total_revenue, net_income, total_assets, total_liabilities, cash_flow_from_operating_activities)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (company_name, year) 
+                DO UPDATE SET 
+                    total_revenue = EXCLUDED.total_revenue,
+                    net_income = EXCLUDED.net_income,
+                    total_assets = EXCLUDED.total_assets,
+                    total_liabilities = EXCLUDED.total_liabilities,
+                    cash_flow_from_operating_activities = EXCLUDED.cash_flow_from_operating_activities;
+                """
+                cur.executemany(insert_query, self.financial_data)
+                conn.commit()
+                print("Financial data inserted/updated successfully!")
         except Exception as e:
             print(f"An error occurred: {e}")
             if conn is not None:
