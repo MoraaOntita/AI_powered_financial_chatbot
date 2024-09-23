@@ -1,6 +1,10 @@
 import psycopg2
 from config import DB_CONFIG
 from typing import Optional, Tuple, List, Dict
+import logging
+
+# Set up logging
+logger = logging.getLogger('BCGChatbotLogger')
 
 class DatabaseError(Exception):
     """Custom exception for database errors."""
@@ -15,7 +19,8 @@ class FinancialDataAccess:
         try:
             return psycopg2.connect(**self.db_config)
         except Exception as e:
-            raise DatabaseError(f"Failed to connect to the database: {e}")
+            logger.error(f"Failed to connect to the database: {e}")
+            raise DatabaseError("Database connection error.")
 
     def _fetchone(self, query: str, params: Tuple) -> Optional[Dict]:
         """Executes a query and fetches one result."""
@@ -26,7 +31,8 @@ class FinancialDataAccess:
                     result = cur.fetchone()
                     return dict(result) if result else None
         except Exception as e:
-            raise DatabaseError(f"Failed to fetch data: {e}")
+            logger.error(f"Failed to fetch one record: {e}")
+            raise DatabaseError("Failed to fetch data.")
 
     def _fetchall(self, query: str, params: Tuple) -> List[Dict]:
         """Executes a query and fetches all results."""
@@ -37,7 +43,8 @@ class FinancialDataAccess:
                     results = cur.fetchall()
                     return [dict(result) for result in results]
         except Exception as e:
-            raise DatabaseError(f"Failed to fetch data: {e}")
+            logger.error(f"Failed to fetch all records: {e}")
+            raise DatabaseError("Failed to fetch data.")
 
     def get_financial_data(self, company_name: str, year: int) -> Optional[Dict]:
         """Fetches financial data for a specific company and year."""
