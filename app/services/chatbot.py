@@ -102,9 +102,7 @@ def process_question(question: str) -> Optional[str]:
                 return "Data for the specified metric or years is not available."
 
         # Handle questions asking for specific financial metrics with dynamic year
-        year = extract_year_from_question(question)
-        if not year:
-            year = 2023  # Default year if no dynamic year found
+        year = extract_year_from_question(question) or 2023  # Default to 2023 if no year found
 
         if "revenue" in question:
             if "Apple" in question:
@@ -145,6 +143,10 @@ def ask_question():
             return jsonify({'error': 'Question is required'}), 400
         
         answer = process_question(question)
+        
+        if answer is None:
+            return jsonify({'error': 'No answer generated.'}), 500
+        
         return jsonify({'answer': answer})
     except Exception as e:
         logging.error(f"An error occurred while handling the question: {e}")
