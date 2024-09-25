@@ -50,10 +50,9 @@ class FinancialDataInserter:
             raise DatabaseError(f"Failed to create table: {e}")
 
     def insert_financial_data(self):
-        conn = None
         try:
-            self._create_table()
-            conn = self._connect()
+            self._create_table()  # This may raise a DatabaseError
+            conn = self._connect()  # Attempt to connect to the database
             with conn.cursor() as cur:
                 insert_query = """
                 INSERT INTO financial_data (company_name, year, total_revenue, net_income, total_assets, total_liabilities, cash_flow_from_operating_activities)
@@ -69,6 +68,9 @@ class FinancialDataInserter:
                 cur.executemany(insert_query, self.financial_data)
                 conn.commit()
                 print("Financial data inserted/updated successfully!")
+        except DatabaseError as db_error:
+            print(f"Database error occurred: {db_error}")
+            raise  # Re-raise the DatabaseError for proper handling in tests
         except Exception as e:
             print(f"An error occurred: {e}")
             if conn is not None:
