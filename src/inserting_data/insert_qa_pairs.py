@@ -45,23 +45,27 @@ class QADataInserter:
                 conn.commit()
 
     def insert_qa_pairs(self):
+        conn = None  # Initialize conn to None
         try:
             self._create_table()
-            with self._connect() as conn:
-                with conn.cursor() as cur:
-                    insert_query = """
-                    INSERT INTO qa_pairs (question, answer, company_name, year)
-                    VALUES (%s, %s, %s, %s)
-                    ON CONFLICT (question, company_name, year) 
-                    DO UPDATE SET 
-                        answer = EXCLUDED.answer;
-                    """
-                    cur.executemany(insert_query, self.qa_pairs)
-                    conn.commit()
-                    print("QA pairs inserted/updated successfully!")
-        except Exception as e:
+            conn = self._connect()  # Attempt to connect
+            with conn.cursor() as cur:
+                insert_query = """
+                INSERT INTO qa_pairs (question, answer, company_name, year)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT (question, company_name, year) 
+                DO UPDATE SET 
+                    answer = EXCLUDED.answer;
+                """
+                cur.executemany(insert_query, self.qa_pairs)
+                conn.commit()
+                print("QA pairs inserted/updated successfully!")
+        except DatabaseError as e:
             print(f"An error occurred: {e}")
-            if conn is not None:
+            raise  # Re-raise the DatabaseError for the test to catch
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            if conn is not None:  # Only attempt to rollback if conn is not None
                 conn.rollback()
 
 # Instantiate with dependency injection
