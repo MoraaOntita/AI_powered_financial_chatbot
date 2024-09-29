@@ -19,32 +19,32 @@ class FinancialDataAccess:
         try:
             return psycopg2.connect(**self.db_config)
         except psycopg2.Error as e:
-            logger.error(f"Database connection error: {e}")
+            logger.error(f"Database connection failed: {e}")
             raise DatabaseError(f"Failed to connect to the database: {e}")
 
-    def _fetchone(self, query: str, params: Tuple) -> Optional[dict]:
-        try:
-            with self._connect() as conn:
-                with conn.cursor() as cur:
-                    cur.execute(query, params)
-                    row = cur.fetchone()
-                    if row:
-                        return {
-                            'total_revenue': row[0],
-                            'net_income': row[1],
-                            'total_assets': row[2],
-                            'total_liabilities': row[3],
-                            'cash_flow_from_operating_activities': row[4]
-                        }
-                    return None
-        except psycopg2.Error as e:
-            logger.error(f"Query execution error: {e}")
-            raise DatabaseError(f"Failed to execute query: {e}")
+    def _fetchone(self, query: str, params: Tuple):
+        with self._connect() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, params)
+                return cursor.fetchone()
 
     def get_financial_data(self, company_name: str, year: int) -> Optional[dict]:
         query = """
-        SELECT total_revenue, net_income, total_assets, total_liabilities, cash_flow_from_operating_activities
-        FROM financial_data
-        WHERE company_name = %s AND year = %s
-        """
-        return self._fetchone(query, (company_name, year))
+            SELECT total_revenue, net_income, total_assets, total_liabilities, cash_flow_from_operating_activities
+            FROM financial_data
+            WHERE company_name = %s AND year = %s
+        """.strip()
+        try:
+            result = self._fetchone(query, (company_name, year))
+            if result is not None:
+                return {
+                    'total_revenue': result[0],
+                    'net_income': result[1],
+                    'total_assets': result[2],
+                    'total_liabilities': result[3],
+                    'cash_flow_from_operating_activities': result[4],
+                }
+            return None
+        except psycopg2.Error as e:
+            logger.error(f"Query execution failed: {e}")
+            raise DatabaseError(f"Failed to execute query: {e}")
