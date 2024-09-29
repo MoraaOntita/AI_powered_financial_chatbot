@@ -10,4 +10,4 @@ flask_migrate
 flask_sqlalchemy
 
 pytest
-
+pytest-mock
