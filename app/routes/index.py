@@ -31,6 +31,10 @@ def ask_question() -> Any:
         Any: JSON response containing the chatbot's answer or an error message.
     """
     try:
+        # Ensure the request content is in JSON format
+        if not request.is_json:
+            return jsonify({"error": "Request must be JSON"}), 400
+
         # Get the incoming JSON data
         data = request.get_json()
 
@@ -56,15 +60,12 @@ def ask_question() -> Any:
 
         return jsonify({'question': question, 'answer': answer})
 
-    except KeyError as e:
-        current_app.logger.error(f"Missing key in request data: {e}")
-        return jsonify({'error': f"Missing key: {str(e)}"}), 400
-
     except ValueError as e:
         # Handle cases where data isn't the expected type
         current_app.logger.error(f"ValueError: {e}")
         return jsonify({'error': str(e)}), 400
 
     except Exception as e:
+        # Log any other exceptions and return a 500 error
         current_app.logger.error(f"An error occurred while processing the question: {e}")
         return jsonify({'error': 'An error occurred while processing your request.'}), 500
