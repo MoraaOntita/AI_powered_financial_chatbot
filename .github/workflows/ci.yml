@@ -16,9 +16,9 @@ jobs:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_USER: postgres  # Default user, can be overridden in steps
-          POSTGRES_PASSWORD: postgres  # Default password, can be overridden in steps
-          POSTGRES_DB: bcg_db  # Default database name, can be overridden in steps
+          POSTGRES_USER: postgres  # Use a default user (update as needed)
+          POSTGRES_PASSWORD: postgres  # Use a default password (update as needed)
+          POSTGRES_DB: bcg_db  # Use a default database name (update as needed)
         options: >-
           --health-cmd="pg_isready -U postgres"
           --health-interval=10s 

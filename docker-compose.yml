@@ -27,7 +27,7 @@ services:
     environment:
       FLASK_APP: ${FLASK_APP:-run.py}
       FLASK_ENV: ${FLASK_ENV:-development}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-Musy19}@postgres:5432/${POSTGRES_DB:-BCG_Finance}}  
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}}  
       
     ports:
       - "5001:5000"
