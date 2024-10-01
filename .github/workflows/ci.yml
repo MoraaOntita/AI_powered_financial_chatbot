@@ -16,11 +16,11 @@ jobs:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: bcg_db
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}  # Use secrets for CI
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}  # Use secrets for CI
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}  # Use secrets for CI
         options: >-
-          --health-cmd="pg_isready -U postgres" 
+          --health-cmd="pg_isready -U ${{ secrets.POSTGRES_USER }}"
           --health-interval=10s 
           --health-timeout=5s 
           --health-retries=5 
@@ -56,17 +56,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
 
-    - name: Set environment variables (CI)
-      run: echo "Environment variables set"
-      env:
-        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        FLASK_APP: ${{ secrets.FLASK_APP }}
-        FLASK_ENV: ${{ secrets.FLASK_ENV }}
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        SECRET_KEY: ${{ secrets.SECRET_KEY }}
-
     - name: Build backend Docker image
       run: docker-compose -f docker-compose.yml build
       env:
@@ -95,9 +84,6 @@ jobs:
     - name: Build and run tests Docker container
       run: docker-compose -f tests/docker-compose.yml up --abort-on-container-exit --exit-code-from test
       env:
-        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     - name: Shutdown services

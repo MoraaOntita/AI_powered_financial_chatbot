@@ -6,7 +6,7 @@ services:
       context: ..  # Set context to the parent directory (BCG-Chatbot)
       dockerfile: tests/Dockerfile  # Specify the Dockerfile in the tests directory
     environment:
-      DATABASE_URL: ${DATABASE_URL}  # Pass through the DATABASE_URL environment variable
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:Musy19@postgres:5432/BCG_Finance}  # Default for local development
       PYTHONPATH: /app/src  # Ensure src is in the PYTHONPATH
     volumes:
       - ..:/app  # Mount the parent directory into the container
