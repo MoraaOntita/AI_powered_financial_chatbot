@@ -56,7 +56,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
 
-    - name: Set environment variables
+    - name: Set environment variables (CI)
+      run: echo "Environment variables set"
       env:
         POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
@@ -65,19 +66,39 @@ jobs:
         FLASK_ENV: ${{ secrets.FLASK_ENV }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      run: echo "Environment variables set"
 
     - name: Build backend Docker image
       run: docker-compose -f docker-compose.yml build
+      env:
+        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        FLASK_APP: ${{ secrets.FLASK_APP }}
+        FLASK_ENV: ${{ secrets.FLASK_ENV }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     - name: Wait for PostgreSQL to be ready
       run: ./wait-for-postgres.sh postgres 5432
 
     - name: Run backend tests using Docker Compose
       run: docker-compose -f docker-compose.yml up --abort-on-container-exit --exit-code-from backend_app
+      env:
+        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        FLASK_APP: ${{ secrets.FLASK_APP }}
+        FLASK_ENV: ${{ secrets.FLASK_ENV }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     - name: Build and run tests Docker container
       run: docker-compose -f tests/docker-compose.yml up --abort-on-container-exit --exit-code-from test
+      env:
+        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     - name: Shutdown services
       run: docker-compose -f docker-compose.yml down && docker-compose -f tests/docker-compose.yml down
