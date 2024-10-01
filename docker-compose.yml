@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Musy19}
     ports:
-      - "5433:5432"
+      - "5433:5432"  # Map the internal PostgreSQL port to the host
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d
@@ -27,7 +27,7 @@ services:
     environment:
       FLASK_APP: ${FLASK_APP:-run.py}
       FLASK_ENV: ${FLASK_ENV:-development}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}}  
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5433/${POSTGRES_DB}}  # Use localhost and port 5433
       
     ports:
       - "5001:5000"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Wait for PostgreSQL to be ready
-/app/wait-for-postgres.sh postgres
+/app/wait-for-postgres.sh localhost 5433  # Using localhost and the correct port
 
 # Check if the wait was successful
 if [ $? -ne 0 ]; then
