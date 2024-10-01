@@ -5,8 +5,6 @@ services:
     build:
       context: ..  # Set context to the parent directory (BCG-Chatbot)
       dockerfile: tests/Dockerfile  # Specify the Dockerfile in the tests directory
-    env_file:
-      - ../.env  # Use relative path to access the .env file
     environment:
       DATABASE_URL: ${DATABASE_URL}  # Pass through the DATABASE_URL environment variable
       PYTHONPATH: /app/src  # Ensure src is in the PYTHONPATH
