@@ -16,11 +16,11 @@ jobs:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}  # Use secrets for CI
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}  # Use secrets for CI
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}  # Use secrets for CI
+          POSTGRES_USER: postgres  # Default user, can be overridden in steps
+          POSTGRES_PASSWORD: postgres  # Default password, can be overridden in steps
+          POSTGRES_DB: bcg_db  # Default database name, can be overridden in steps
         options: >-
-          --health-cmd="pg_isready -U ${{ secrets.POSTGRES_USER }}"
+          --health-cmd="pg_isready -U postgres"
           --health-interval=10s 
           --health-timeout=5s 
           --health-retries=5 
@@ -69,6 +69,9 @@ jobs:
 
     - name: Wait for PostgreSQL to be ready
       run: ./wait-for-postgres.sh postgres 5432
+      env:
+        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
     - name: Run backend tests using Docker Compose
       run: docker-compose -f docker-compose.yml up --abort-on-container-exit --exit-code-from backend_app
@@ -85,6 +88,8 @@ jobs:
       run: docker-compose -f tests/docker-compose.yml up --abort-on-container-exit --exit-code-from test
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
     - name: Shutdown services
       run: docker-compose -f docker-compose.yml down && docker-compose -f tests/docker-compose.yml down
