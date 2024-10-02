@@ -69,7 +69,7 @@ jobs:
           sleep 5
         done
 
-    # Give some time for PostgreSQL to fully initialize
+    # Sleep before running tests
     - name: Sleep before running tests
       run: sleep 10  # Increase this if necessary
 
