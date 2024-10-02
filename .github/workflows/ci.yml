@@ -69,7 +69,7 @@ jobs:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     - name: Wait for PostgreSQL to be ready
-      run: ./wait-for-postgres.sh postgres 5432
+      run: ./wait-for-postgres.sh postgres 5433
       env:
         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
