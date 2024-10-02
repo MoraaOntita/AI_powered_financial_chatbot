@@ -1,13 +1,33 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: test_db  # Test-specific DB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Musy19
+    ports:
+      - "5434:5432"  # Separate port for test PostgreSQL
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d test_db"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+
   test:
     build:
-      context: ..  # Set context to the parent directory (BCG-Chatbot)
-      dockerfile: tests/Dockerfile  # Specify the Dockerfile in the tests directory
+      context: ..  # Use the parent directory (BCG-Chatbot)
+      dockerfile: tests/Dockerfile
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:Musy19@postgres:5432/BCG_Finance}  # Default for local development
-      PYTHONPATH: /app/src  # Ensure src is in the PYTHONPATH
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:Musy19@postgres:5432/test_db}  # Pointing to test DB
+      PYTHONPATH: /app/src
     volumes:
-      - ..:/app  # Mount the parent directory into the container
-    command: ["pytest", "tests/"]  # Run all tests in the tests directory
+      - ..:/app
+    command: ["pytest", "tests/"]
+
+volumes:
+  test_postgres_data:
+    driver: local
