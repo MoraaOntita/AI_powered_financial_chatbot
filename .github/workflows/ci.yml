@@ -61,7 +61,7 @@ jobs:
 
     # Wait for PostgreSQL to be ready using the correct hostname
     - name: Wait for PostgreSQL to be ready
-      run: ./wait-for-postgres.sh postgres 5432  # Using the correct service name and port
+      run: docker-compose exec backend_app ./wait-for-postgres.sh postgres 5432
 
     - name: Run backend tests using Docker Compose
       run: docker-compose -f docker-compose.yml up --abort-on-container-exit --exit-code-from backend_app
