@@ -16,10 +16,11 @@ jobs:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}  
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        options: >
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: bcg_db
+        options: >-
+          --health-cmd="pg_isready -U postgres" 
           --health-interval=10s 
           --health-timeout=5s 
           --health-retries=5 
@@ -52,39 +53,23 @@ jobs:
 
     - name: Install dependencies
       run: |
-          python -m pip install --upgrade pip
-          for i in {1..5}; do pip install pytest && break || sleep 5; done
+        python -m pip install --upgrade pip
+        pip install pytest
 
     - name: Build backend Docker image
       run: docker-compose -f docker-compose.yml build
-      env:
-        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        FLASK_APP: ${{ secrets.FLASK_APP }}
-        FLASK_ENV: ${{ secrets.FLASK_ENV }}
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     - name: Wait for PostgreSQL to be ready
       run: ./wait-for-postgres.sh postgres 5432
-      env:
-        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
     - name: Run backend tests using Docker Compose
       run: docker-compose -f docker-compose.yml up --abort-on-container-exit --exit-code-from backend_app
-      env:
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          FLASK_APP: ${{ secrets.FLASK_APP }}
-          FLASK_ENV: ${{ secrets.FLASK_ENV }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
+    - name: Build and run tests Docker container
+      run: docker-compose -f tests/docker-compose.yml up --abort-on-container-exit --exit-code-from test
 
     - name: Shutdown services
-      run: docker-compose -f docker-compose.yml down
+      run: docker-compose -f docker-compose.yml down && docker-compose -f tests/docker-compose.yml down
 
     - name: Archive test results
       if: always()
