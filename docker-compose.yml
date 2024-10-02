@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Musy19}
     ports:
-      - "5433:5432"  # Map the internal PostgreSQL port to the host
+      - "5432:5432"  # Changed to standard PostgreSQL port
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d
@@ -17,17 +17,20 @@ services:
     healthcheck:  
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]  
       interval: 10s  
-      retries: 10  
-      start_period: 60s
+      retries: 5  # Reduced retries for quicker feedback
+      start_period: 15s  # Adjusted start period for faster startup checks
 
   backend:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: backend_app
-    environment:
-      FLASK_APP: ${FLASK_APP:-run.py}
-      FLASK_ENV: ${FLASK_ENV:-development}
+    environment:  
+      FLASK_APP: ${FLASK_APP:-run.py}  
+      FLASK_ENV: ${FLASK_ENV:-development}  
+      POSTGRES_DB: ${POSTGRES_DB:-BCG_Finance}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Musy19}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       
     ports:
@@ -38,7 +41,7 @@ services:
     volumes:
       - .:/app
       - ./data:/app/data
-    entrypoint: ["/app/entrypoint.sh"]
+    entrypoint: ["/app/wait-for-postgres.sh", "postgres", "flask", "run", "--host=0.0.0.0", "--port=5000"]
 
 volumes:
   postgres_data:

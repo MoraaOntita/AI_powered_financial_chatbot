@@ -16,16 +16,17 @@ jobs:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_USER: postgres  # Use a default user (update as needed)
-          POSTGRES_PASSWORD: postgres  # Use a default password (update as needed)
-          POSTGRES_DB: bcg_db  # Use a default database name (update as needed)
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}  # Use secrets for environment variables
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         options: >-
-          --health-cmd="pg_isready -U postgres"
+          --health-cmd="pg_isready -U postgres"  # Use the hardcoded user name since it's set in the env
           --health-interval=10s 
           --health-timeout=5s 
           --health-retries=5 
         ports:
           - 5432:5432
+
 
     steps:
     - name: Checkout code
@@ -69,7 +70,7 @@ jobs:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     - name: Wait for PostgreSQL to be ready
-      run: ./wait-for-postgres.sh postgres_db2 5433
+      run: ./wait-for-postgres.sh postgres_db2 5432
 
       env:
         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
@@ -78,13 +79,13 @@ jobs:
     - name: Run backend tests using Docker Compose
       run: docker-compose -f docker-compose.yml up --abort-on-container-exit --exit-code-from backend_app
       env:
-        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        FLASK_APP: ${{ secrets.FLASK_APP }}
-        FLASK_ENV: ${{ secrets.FLASK_ENV }}
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          FLASK_APP: ${{ secrets.FLASK_APP }}
+          FLASK_ENV: ${{ secrets.FLASK_ENV }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     - name: Build and run tests Docker container
       run: docker-compose -f tests/docker-compose.yml up --abort-on-container-exit --exit-code-from test

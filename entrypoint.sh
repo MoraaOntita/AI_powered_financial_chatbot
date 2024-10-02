@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Load environment variables from .env file
+source /app/.env
+
 # Wait for PostgreSQL to be ready
 /app/wait-for-postgres.sh postgres 5432 
 
