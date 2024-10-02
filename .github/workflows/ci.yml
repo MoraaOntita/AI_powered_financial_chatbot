@@ -25,7 +25,7 @@ jobs:
           --health-timeout=5s 
           --health-retries=5 
         ports:
-          - 5432:5432
+          - 5433:5432  # Changed to avoid port conflicts
 
     steps:
     - name: Checkout code
@@ -56,11 +56,22 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
 
-    # Wait for PostgreSQL to be ready using the correct hostname
+    # Wait for PostgreSQL to be ready
     - name: Wait for PostgreSQL to be ready
       run: |
         docker-compose -f docker-compose.yml up -d
-        docker-compose -f docker-compose.yml exec backend_app ./wait-for-postgres.sh postgres 5432
+        for i in {1..10}; do
+          if docker-compose -f docker-compose.yml exec backend_app ./wait-for-postgres.sh postgres 5432; then
+            echo "PostgreSQL is ready!"
+            break
+          fi
+          echo "Waiting for PostgreSQL..."
+          sleep 5
+        done
+
+    # Give some time for PostgreSQL to fully initialize
+    - name: Sleep before running tests
+      run: sleep 10  # Increase this if necessary
 
     - name: Run backend tests using Docker Compose
       run: docker-compose -f docker-compose.yml up --abort-on-container-exit --exit-code-from backend_app
