@@ -1,36 +1,38 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:13
     container_name: postgres_db2
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-BCG_Finance}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Musy19}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432" 
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d
 
-    healthcheck:  
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]  
-      interval: 10s  
-      retries: 5  # Reduced retries for quicker feedback
-      start_period: 15s  # Adjusted start period for faster startup checks
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+      timeout: 5s
 
   backend:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: backend_app
-    environment:  
-      FLASK_APP: ${FLASK_APP:-run.py}  
-      FLASK_ENV: ${FLASK_ENV:-development}  
-      POSTGRES_DB: ${POSTGRES_DB:-BCG_Finance}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Musy19}
+    environment:
+      FLASK_APP: ${FLASK_APP}
+      FLASK_ENV: ${FLASK_ENV}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      
     ports:
       - "5001:5000"
     depends_on:
