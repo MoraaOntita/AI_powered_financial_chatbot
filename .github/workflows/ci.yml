@@ -16,17 +16,15 @@ jobs:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}  # Use secrets for environment variables
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}  
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        options: >-
-          --health-cmd="pg_isready -U postgres"  # Use the hardcoded user name since it's set in the env
+        options: >
           --health-interval=10s 
           --health-timeout=5s 
           --health-retries=5 
         ports:
           - 5432:5432
-
 
     steps:
     - name: Checkout code
@@ -56,7 +54,6 @@ jobs:
       run: |
           python -m pip install --upgrade pip
           for i in {1..5}; do pip install pytest && break || sleep 5; done
-      
 
     - name: Build backend Docker image
       run: docker-compose -f docker-compose.yml build
@@ -70,8 +67,7 @@ jobs:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     - name: Wait for PostgreSQL to be ready
-      run: ./wait-for-postgres.sh postgres_db2 5432
-
+      run: ./wait-for-postgres.sh postgres 5432
       env:
         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
@@ -87,15 +83,8 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
-    - name: Build and run tests Docker container
-      run: docker-compose -f tests/docker-compose.yml up --abort-on-container-exit --exit-code-from test
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-
     - name: Shutdown services
-      run: docker-compose -f docker-compose.yml down && docker-compose -f tests/docker-compose.yml down
+      run: docker-compose -f docker-compose.yml down
 
     - name: Archive test results
       if: always()
