@@ -13,11 +13,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      retries: 5
-      start_period: 30s
+
+    healthcheck:  
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]  
+      interval: 10s  
+      retries: 10  
+      start_period: 60s
 
   backend:
     build:
@@ -27,7 +28,7 @@ services:
     environment:
       FLASK_APP: ${FLASK_APP:-run.py}
       FLASK_ENV: ${FLASK_ENV:-development}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5433/${POSTGRES_DB}}  # Use localhost and port 5433
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5433/${POSTGRES_DB}
       
     ports:
       - "5001:5000"
