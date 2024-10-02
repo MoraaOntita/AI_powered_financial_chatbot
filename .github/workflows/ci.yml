@@ -56,21 +56,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
 
-    - name: Build backend Docker image
-      run: docker-compose -f docker-compose.yml up --abort-on-container-exit --exit-code-from backend_app
-      
     # Wait for PostgreSQL to be ready using the correct hostname
     - name: Wait for PostgreSQL to be ready
-      run: docker-compose exec backend_app ./wait-for-postgres.sh postgres 5432
+      run: |
+        docker-compose -f docker-compose.yml up -d
+        docker-compose -f docker-compose.yml exec backend_app ./wait-for-postgres.sh postgres 5432
 
     - name: Run backend tests using Docker Compose
       run: docker-compose -f docker-compose.yml up --abort-on-container-exit --exit-code-from backend_app
 
-    - name: Build and run tests Docker container
-      run: docker-compose -f tests/docker-compose.yml up --abort-on-container-exit --exit-code-from test
-
     - name: Shutdown services
-      run: docker-compose -f docker-compose.yml down && docker-compose -f tests/docker-compose.yml down
+      run: docker-compose -f docker-compose.yml down
 
     - name: Archive test results
       if: always()
