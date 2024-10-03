@@ -19,6 +19,7 @@ services:
       start_period: 15s  # Adjusted start period for faster startup checks
 
   backend:
+  
     build:
       context: .
       dockerfile: Dockerfile
