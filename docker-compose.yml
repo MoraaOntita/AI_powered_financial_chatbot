@@ -1,20 +1,22 @@
-version: "3.8"
-
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:13
+    container_name: postgres_db2
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_DB:-BCG_Finance}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Musy19}
+    ports:
+      - "5432:5432" 
     volumes:
-      - ./init:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      retries: 5
-      start_period: 15s
+      - ./init:/docker-entrypoint-initdb.d
+
+    healthcheck:  
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]  
+      interval: 10s  
+      retries: 5  # Reduced retries for quicker feedback
+      start_period: 15s  # Adjusted start period for faster startup checks
 
   backend:
     build:
@@ -22,13 +24,13 @@ services:
       dockerfile: Dockerfile
     container_name: backend_app
     environment:  
-      FLASK_APP: ${FLASK_APP}
-      FLASK_ENV: ${FLASK_ENV}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      FLASK_APP: ${FLASK_APP:-run.py}  
+      FLASK_ENV: ${FLASK_ENV:-development}  
+      POSTGRES_DB: ${POSTGRES_DB:-BCG_Finance}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Musy19}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      SECRET_KEY: ${SECRET_KEY}  
+      
     ports:
       - "5001:5000"
     depends_on:
@@ -39,11 +41,15 @@ services:
       test: ["CMD-SHELL", "curl -f http://localhost:5000/ || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 3    
+      retries: 3
+
     volumes:
       - .:/app
       - ./data:/app/data
     entrypoint: ["/app/entrypoint.sh"]
+
+    env_file:
+      - .env
 
 volumes:
   postgres_data:
