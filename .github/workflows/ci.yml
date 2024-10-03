@@ -45,6 +45,7 @@ jobs:
       with:
         python-version: '3.11'
 
+    # Install Docker Compose
     - name: Install Docker Compose
       run: |
         sudo apt-get update
@@ -58,9 +59,9 @@ jobs:
     # Wait for PostgreSQL to be ready
     - name: Wait for PostgreSQL to be ready
       run: |
-        docker-compose -f docker-compose.yml up -d
+        POSTGRES_USER=${{ secrets.POSTGRES_USER }} POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} POSTGRES_DB=${{ secrets.POSTGRES_DB }} docker-compose -f docker-compose.yml up -d
         for i in {1..10}; do
-          if docker-compose -f docker-compose.yml exec backend ./wait-for-postgres.sh postgres 5432; then
+          if POSTGRES_USER=${{ secrets.POSTGRES_USER }} POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} POSTGRES_DB=${{ secrets.POSTGRES_DB }} docker-compose -f docker-compose.yml exec backend ./wait-for-postgres.sh postgres 5432; then
             echo "PostgreSQL is ready!"
             break
           fi
@@ -68,18 +69,14 @@ jobs:
           sleep 5
         done
 
+    # Sleep before running tests
+    - name: Sleep before running tests
+      run: sleep 10  # Increase this if necessary
+
     # Run backend tests using Docker Compose
     - name: Run backend tests using Docker Compose
-      env:
-        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        FLASK_APP: ${{ secrets.FLASK_APP }}
-        FLASK_ENV: ${{ secrets.FLASK_ENV }}
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        SECRET_KEY: ${{ secrets.SECRET_KEY }}
       run: |
-        docker-compose -f docker-compose.yml up --abort-on-container-exit --exit-code-from backend
+        POSTGRES_USER=${{ secrets.POSTGRES_USER }} POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} POSTGRES_DB=${{ secrets.POSTGRES_DB }} docker-compose -f docker-compose.yml up --abort-on-container-exit --exit-code-from backend
 
     # Shutdown services
     - name: Shutdown services
