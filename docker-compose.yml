@@ -15,8 +15,8 @@ services:
     healthcheck:  
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]  
       interval: 10s  
-      retries: 5  # Reduced retries for quicker feedback
-      start_period: 15s  # Adjusted start period for faster startup checks
+      retries: 5 
+      start_period: 30s
 
   backend:
     build:
@@ -46,7 +46,7 @@ services:
     volumes:
       - .:/app
       - ./data:/app/data
-      - ./.env:/app/.env
+      - ./env:/app/.env
     entrypoint: ["/app/entrypoint.sh"]
 
 volumes:
