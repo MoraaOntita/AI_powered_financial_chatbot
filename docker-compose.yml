@@ -46,6 +46,7 @@ services:
     volumes:
       - .:/app
       - ./data:/app/data
+      - ./.env:/app/.env
     entrypoint: ["/app/entrypoint.sh"]
 
 volumes:
