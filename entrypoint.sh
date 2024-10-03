@@ -6,7 +6,8 @@ source /app/.env
 set +a
 
 # Wait for PostgreSQL to be ready
-/app/wait-for-postgres.sh postgres 5432
+/app/wait-for-postgres.sh postgres
+
 
 echo "PostgreSQL is up. Running data insertion scripts..."
 
