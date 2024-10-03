@@ -17,4 +17,4 @@ until psql -h "$host" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c '\q'; do
 done
 
 >&2 echo "Postgres is up - executing command"
-exec $cmd
+exec "$cmd" 
