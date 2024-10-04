@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   postgres:
@@ -50,7 +49,9 @@ services:
     volumes:
       - .:/app
       - ./data:/app/data
-    entrypoint: ["./wait-for-postgres.sh", "postgres", "flask", "run", "--host=0.0.0.0"]
+
+    entrypoint: ["/app/entrypoint.sh"]
+    command: ["flask", "run", "--host=0.0.0.0"]
 
 volumes:
   postgres_data:

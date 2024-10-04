@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Function to load environment variables from .env file
 load_env() {
   if [ -f /app/.env ]; then
     echo "Loading environment variables from .env file"
@@ -12,6 +13,7 @@ load_env() {
   fi
 }
 
+# Function to check if required files exist
 check_files() {
   for file in "$@"; do
     if [ ! -f "$file" ]; then
@@ -21,6 +23,7 @@ check_files() {
   done
 }
 
+# Function to run the scripts and start Flask
 run_scripts() {
   echo "Postgres is up - executing data insertion scripts and starting Flask"
   bash -c "
@@ -30,7 +33,14 @@ run_scripts() {
   "
 }
 
+# Load environment variables
 load_env
+
+# Wait for PostgreSQL to be ready and pass the command to run
 /app/wait-for-postgres.sh postgres
+
+# Check for necessary files
 check_files /app/src/inserting_data/insert_financial_data.py /app/src/inserting_data/insert_qa_pairs.py
+
+# Run the scripts and start Flask
 run_scripts
