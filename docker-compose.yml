@@ -50,7 +50,7 @@ services:
     volumes:
       - .:/app
       - ./data:/app/data
-    entrypoint: ["/app/entrypoint.sh"]
+    entrypoint: ["./wait-for-postgres.sh", "postgres", "flask", "run", "--host=0.0.0.0"]
 
 volumes:
   postgres_data:
