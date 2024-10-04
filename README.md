@@ -35,12 +35,12 @@ Before you begin, ensure you have the following installed:
 
 Create a `.env` file in the root directory with the following variables:
 
-POSTGRES_DB=<your_database_name>
-POSTGRES_USER=<your_username>
-POSTGRES_PASSWORD=<your_password>
-FLASK_APP=run.py
-FLASK_ENV=development
-SECRET_KEY=<your_secret_key>
+- POSTGRES_DB=<your_database_name>
+- POSTGRES_USER=<your_username>
+- POSTGRES_PASSWORD=<your_password>
+- FLASK_APP=run.py
+- FLASK_ENV=development
+- SECRET_KEY=<your_secret_key>
 
 
 ### 3. Build and Run the Application
