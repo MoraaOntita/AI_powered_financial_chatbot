@@ -20,7 +20,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         options: >-
-          --health-cmd="pg_isready -U postgres" 
+          --health-cmd="pg_isready -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }}" 
           --health-interval=10s 
           --health-timeout=5s 
           --health-retries=5 
@@ -59,9 +59,8 @@ jobs:
     # Wait for PostgreSQL to be ready
     - name: Wait for PostgreSQL to be ready
       run: |
-        POSTGRES_USER=${{ secrets.POSTGRES_USER }} POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} POSTGRES_DB=${{ secrets.POSTGRES_DB }} docker-compose -f docker-compose.yml up -d
         for i in {1..10}; do
-          if POSTGRES_USER=${{ secrets.POSTGRES_USER }} POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} POSTGRES_DB=${{ secrets.POSTGRES_DB }} docker-compose -f docker-compose.yml exec backend ./wait-for-postgres.sh postgres 5432; then
+          if docker exec -i postgres_db2 pg_isready -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }}; then
             echo "PostgreSQL is ready!"
             break
           fi
@@ -76,7 +75,7 @@ jobs:
     # Run backend tests using Docker Compose
     - name: Run backend tests using Docker Compose
       run: |
-        POSTGRES_USER=${{ secrets.POSTGRES_USER }} POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} POSTGRES_DB=${{ secrets.POSTGRES_DB }} docker-compose -f docker-compose.yml up --abort-on-container-exit --exit-code-from backend
+        docker-compose -f docker-compose.yml up --abort-on-container-exit --exit-code-from backend
 
     # Shutdown services
     - name: Shutdown services

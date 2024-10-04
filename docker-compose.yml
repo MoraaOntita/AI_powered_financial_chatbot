@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:13
@@ -11,7 +13,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d
-
     healthcheck:  
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]  
       interval: 10s  
@@ -43,10 +44,12 @@ services:
       timeout: 10s
       retries: 3
 
+    env_file:
+      - .env       
+
     volumes:
       - .:/app
       - ./data:/app/data
-      - ./BCG-Chatbot/.env:/app/.env
     entrypoint: ["/app/entrypoint.sh"]
 
 volumes:
