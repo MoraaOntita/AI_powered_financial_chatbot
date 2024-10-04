@@ -31,6 +31,5 @@ run_scripts() {
 }
 
 load_env
-/app/wait-for-postgres.sh postgres
+/app/wait-for-postgres.sh postgres run_scripts
 check_files /app/src/inserting_data/insert_financial_data.py /app/src/inserting_data/insert_qa_pairs.py
-run_scripts
