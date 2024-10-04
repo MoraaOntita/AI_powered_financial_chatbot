@@ -16,14 +16,16 @@ jobs:
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      FLASK_APP: run.py
+      FLASK_ENV: development
 
     services:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}  # Use directly here
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}  # Use directly here
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}  # Use directly here
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         options: >-
           --health-cmd="pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" 
           --health-interval=10s 
@@ -35,6 +37,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+
+    - name: Create .env file
+      run: |
+        echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+        echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+        echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+        echo "FLASK_APP=run.py" >> .env
+        echo "FLASK_ENV=development" >> .env
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -50,7 +60,6 @@ jobs:
       with:
         python-version: '3.11'
 
-    # Cache dependencies to speed up builds
     - name: Cache Python dependencies
       uses: actions/cache@v3
       with:
@@ -60,7 +69,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
-    # Install Docker Compose
     - name: Install Docker Compose
       run: |
         sudo apt-get update
@@ -70,9 +78,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest
 
-    # Wait for PostgreSQL to be ready
     - name: Wait for PostgreSQL to be ready
       run: |
         docker-compose -f docker-compose.yml up -d
@@ -85,21 +91,18 @@ jobs:
           sleep 5
         done
 
-    # Sleep before running tests
     - name: Sleep before running tests
       run: sleep 10  # Increase this if necessary
 
-    # Run backend tests using Docker Compose
     - name: Run backend tests using Docker Compose
       run: |
         docker-compose -f docker-compose.yml up --abort-on-container-exit --exit-code-from backend
+        docker-compose -f docker-compose.yml exec backend pytest --junitxml=tests/test-results.xml
 
-    # Shutdown services
     - name: Shutdown services
       if: always()
       run: docker-compose -f docker-compose.yml down
 
-    # Archive test results
     - name: Archive test results
       if: always()
       uses: actions/upload-artifact@v3
