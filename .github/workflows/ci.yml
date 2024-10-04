@@ -12,15 +12,20 @@ jobs:
   build_and_test:
     runs-on: ubuntu-latest
 
+    env:
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+
     services:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}  # Use directly here
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}  # Use directly here
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}  # Use directly here
         options: >-
-          --health-cmd="pg_isready -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }}" 
+          --health-cmd="pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" 
           --health-interval=10s 
           --health-timeout=5s 
           --health-retries=5 
@@ -45,6 +50,16 @@ jobs:
       with:
         python-version: '3.11'
 
+    # Cache dependencies to speed up builds
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     # Install Docker Compose
     - name: Install Docker Compose
       run: |
@@ -54,13 +69,15 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install -r requirements.txt
         pip install pytest
 
     # Wait for PostgreSQL to be ready
     - name: Wait for PostgreSQL to be ready
       run: |
+        docker-compose -f docker-compose.yml up -d
         for i in {1..10}; do
-          if docker exec -i postgres_db2 pg_isready -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }}; then
+          if docker-compose -f docker-compose.yml exec postgres pg_isready -U $POSTGRES_USER -d $POSTGRES_DB; then
             echo "PostgreSQL is ready!"
             break
           fi
@@ -79,6 +96,7 @@ jobs:
 
     # Shutdown services
     - name: Shutdown services
+      if: always()
       run: docker-compose -f docker-compose.yml down
 
     # Archive test results
